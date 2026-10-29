@@ -22,6 +22,30 @@ public interface PriceSnapshotRepository extends JpaRepository<PriceSnapshot, Lo
      */
     Page<PriceSnapshot> findBySymbolAndFetchedAtBetween(String symbol, Instant from, Instant to, Pageable pageable);
 
+    Optional<PriceSnapshot> findFirstBySymbolAndFetchedAtBetweenOrderByFetchedAtAsc(String symbol,
+                                                                                    Instant from,
+                                                                                    Instant to);
+
+    Optional<PriceSnapshot> findFirstBySymbolAndFetchedAtBetweenOrderByFetchedAtDesc(String symbol,
+                                                                                     Instant from,
+                                                                                     Instant to);
+
+    /**
+     * Native SQL on purpose: JPQL {@code AVG} always returns {@code Double}, which would lose precision.
+     * The average is rounded to the largest scale among the averaged prices, i.e. to the precision Binance reports.
+     * Both bounds are inclusive.
+     *
+     * @return empty if there are no prices in the interval
+     */
+    @Query(value = """
+            SELECT ROUND(AVG(price), MAX(SCALE(price)))
+            FROM price_snapshot
+            WHERE symbol = :symbol AND fetched_at BETWEEN :from AND :to
+            """, nativeQuery = true)
+    Optional<BigDecimal> findAveragePrice(@Param("symbol") String symbol,
+                                          @Param("from") Instant from,
+                                          @Param("to") Instant to);
+
     /**
      * Inserts a snapshot unless one with the same symbol and close time already exists.
      *
