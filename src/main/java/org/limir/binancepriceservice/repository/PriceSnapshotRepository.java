@@ -1,6 +1,8 @@
 package org.limir.binancepriceservice.repository;
 
 import org.limir.binancepriceservice.entity.PriceSnapshot;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -9,8 +11,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Optional;
 
 public interface PriceSnapshotRepository extends JpaRepository<PriceSnapshot, Long> {
+
+    Optional<PriceSnapshot> findFirstBySymbolOrderByFetchedAtDesc(String symbol);
+
+    /**
+     * Both bounds are inclusive.
+     */
+    Page<PriceSnapshot> findBySymbolAndFetchedAtBetween(String symbol, Instant from, Instant to, Pageable pageable);
 
     /**
      * Inserts a snapshot unless one with the same symbol and close time already exists.

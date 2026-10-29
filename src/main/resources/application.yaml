@@ -5,6 +5,10 @@ spring:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:binance_prices}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+  web:
+    # validation messages in API errors are always English, regardless of the server or client locale
+    locale: en
+    locale-resolver: fixed
   jpa:
     open-in-view: false
     hibernate:
