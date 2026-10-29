@@ -15,5 +15,26 @@ services:
       timeout: 5s
       retries: 10
 
+  app:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-binance_prices}
+      DB_USERNAME: ${DB_USERNAME:-binance}
+      DB_PASSWORD: ${DB_PASSWORD:-binance}
+      # Passed through only if set on the host; otherwise the defaults from application.yaml apply
+      BINANCE_BASE_URL:
+      BINANCE_SYMBOL:
+      BINANCE_POLL_INTERVAL:
+      BINANCE_CONNECT_TIMEOUT:
+      BINANCE_READ_TIMEOUT:
+      TREND_FLAT_THRESHOLD_PERCENT:
+    ports:
+      - "${APP_PORT:-8080}:8080"
+
 volumes:
   postgres-data:
